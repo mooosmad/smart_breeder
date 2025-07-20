@@ -857,16 +857,16 @@ List<Widget> _generateWeeklyPlanning() {
     final weeksToShow = totalWeeks > 8 ? 8 : totalWeeks; // Limiter à 8 semaines max
     
     for (int i = 1; i <= weeksToShow; i++) {
-      final weekAge = currentAge + i;
+      final futureWeekAge = currentAge + i; // CORRECTION: Age réel de la semaine future
       final weekDate = currentDate.add(Duration(days: i * 7));
-      final weekData = _generateDynamicWeekData(weekAge, chickenType, quantity, i);
+      final weekData = _generateDynamicWeekData(futureWeekAge, chickenType, quantity, i, currentAge);
       
       weeks.add(_buildDynamicWeekCard(
         'Semaine $i',
-        weekAge,
+        futureWeekAge,
         weekDate,
         weekData,
-        _getWeekColor(i, weekAge, chickenType),
+        _getWeekColor(i, futureWeekAge, chickenType),
       ));
     }
   }
@@ -879,19 +879,19 @@ int _calculateTotalWeeks(String chickenType, int currentAge) {
   if (chickenType.toLowerCase().contains('chair')) {
     return (8 - currentAge).clamp(1, 8); // Poulets de chair jusqu'à 8 semaines
   } else if (chickenType.toLowerCase().contains('pondeuses')) {
-    return 12; // Pondeuses ont un cycle plus long
+    return (52 - currentAge).clamp(1, 12); // Pondeuses ont un cycle plus long, max 12 semaines affichées
   } else {
-    return 8; // Par défaut
+    return (12 - currentAge).clamp(1, 8); // Par défaut
   }
 }
 
-// Nouvelle méthode pour générer des données de semaine dynamiques
-Map<String, dynamic> _generateDynamicWeekData(int age, String chickenType, int quantity, int weekNumber) {
+// CORRECTION MAJEURE: Méthode pour générer des données de semaine dynamiques avec progression
+Map<String, dynamic> _generateDynamicWeekData(int futureAge, String chickenType, int quantity, int weekNumber, int currentAge) {
   final isChair = chickenType.toLowerCase().contains('chair');
   final isPondeuses = chickenType.toLowerCase().contains('pondeuses');
   
   Map<String, dynamic> weekData = {
-    'age': '$age semaines',
+    'age': '$futureAge semaines',
     'tasks': <String>[],
     'nutrition': '',
     'health': '',
@@ -900,141 +900,294 @@ Map<String, dynamic> _generateDynamicWeekData(int age, String chickenType, int q
     'estimatedCost': 0,
   };
   
-  // Tâches spécifiques par âge et type
+  // CORRECTION: Tâches spécifiques par âge FUTUR et type
   if (isChair) {
-    if (age <= 2) {
+    if (futureAge <= 1) {
       weekData['tasks'] = [
-        'Maintenir température 32-35°C avec chauffage',
-        'Alimentation starter haute protéine (6x/jour)',
-        'Contrôler humidité 60-70%',
-        'Vaccination Newcastle (si due)',
-        'Surveiller comportement et croissance',
+        'Installation du matériel de chauffage et éclairage',
+        'Préparation des aliments starter (22-24% protéines)',
+        'Mise en place des abreuvoirs et mangeoires',
+        'Contrôle température initiale 35°C sous éleveuse',
+        'Réception et installation des poussins',
       ];
-      weekData['nutrition'] = 'Starter 22-24% protéines, ${_calculateFeedAmount(quantity, age)}kg/jour';
-      weekData['health'] = 'Observation quotidienne, température corporelle';
-      weekData['description'] = 'Phase critique de démarrage - surveillance intensive requise';
+      weekData['nutrition'] = 'Starter 22-24% protéines, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Vaccination J1 (Marek si nécessaire), contrôle température';
+      weekData['description'] = 'Installation et démarrage - première semaine critique';
+      weekData['priority'] = 'critical';
+      weekData['estimatedCost'] = quantity * 50; // Coût installation + poussins
+    } else if (futureAge <= 2) {
+      weekData['tasks'] = [
+        'Maintenir température 32-33°C avec chauffage',
+        'Alimentation starter 6 fois par jour',
+        'Contrôler humidité 60-65%',
+        'Observer comportement alimentaire et hydrique',
+        'Ajuster l\'espace disponible selon croissance',
+      ];
+      weekData['nutrition'] = 'Starter 22-24% protéines, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Surveillance quotidienne mortalité, pesée échantillon';
+      weekData['description'] = 'Stabilisation croissance - adaptation aux conditions';
       weekData['priority'] = 'high';
-      weekData['estimatedCost'] = quantity * 15; // 15 FCFA par sujet
-    } else if (age <= 4) {
+      weekData['estimatedCost'] = quantity * 20;
+    } else if (futureAge <= 3) {
       weekData['tasks'] = [
-        'Réduire température à 28-30°C progressivement',
-        'Alimentation croissance (4x/jour)',
-        'Pesée échantillon (10% du lot)',
-        'Nettoyage quotidien des abreuvoirs',
-        'Contrôle ventilation',
+        'Réduire température à 30°C progressivement',
+        'Passer à l\'alimentation croissance (18-20% protéines)',
+        'Vaccination Newcastle (J21)',
+        'Première pesée complète du lot',
+        'Ajuster densité si nécessaire',
       ];
-      weekData['nutrition'] = 'Croissance 18-20% protéines, ${_calculateFeedAmount(quantity, age)}kg/jour';
-      weekData['health'] = 'Pesée hebdomadaire, vaccination Gumboro si nécessaire';
-      weekData['description'] = 'Phase de croissance rapide - optimiser l\'alimentation';
-      weekData['priority'] = 'normal';
+      weekData['nutrition'] = 'Croissance 18-20% protéines, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Vaccination Newcastle, contrôle uniformité poids';
+      weekData['description'] = 'Transition nutritionnelle - vaccination importante';
+      weekData['priority'] = 'high';
       weekData['estimatedCost'] = quantity * 25;
-    } else if (age <= 6) {
+    } else if (futureAge <= 4) {
       weekData['tasks'] = [
-        'Température ambiante 25-28°C',
-        'Alimentation finition (3x/jour)',
-        'Évaluation poids commercial',
-        'Préparation logistique vente',
-        'Restriction alimentaire avant abattage',
+        'Température ambiante 28°C',
+        'Alimentation croissance 4 fois par jour',
+        'Vaccination Gumboro (J28)',
+        'Contrôle qualité de l\'eau',
+        'Évaluation croissance vs objectifs',
       ];
-      weekData['nutrition'] = 'Finition 16-18% protéines, ${_calculateFeedAmount(quantity, age)}kg/jour';
-      weekData['health'] = 'Inspection pré-abattage, retrait antibiotiques';
-      weekData['description'] = 'Finition pour commercialisation - optimiser le poids';
+      weekData['nutrition'] = 'Croissance 18-20% protéines, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Vaccination Gumboro, surveillance respiratoire';
+      weekData['description'] = 'Croissance rapide - deuxième vaccination';
+      weekData['priority'] = 'normal';
+      weekData['estimatedCost'] = quantity * 30;
+    } else if (futureAge <= 5) {
+      weekData['tasks'] = [
+        'Maintenir température 25-27°C',
+        'Commencer alimentation finition (16-18% protéines)',
+        'Pesée pour évaluation commerciale',
+        'Prévoir planning d\'abattage',
+        'Optimiser ventilation pour confort',
+      ];
+      weekData['nutrition'] = 'Finition 16-18% protéines, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Évaluation sanitaire générale, pesée commerciale';
+      weekData['description'] = 'Préparation finition - évaluation commerciale';
+      weekData['priority'] = 'normal';
+      weekData['estimatedCost'] = quantity * 35;
+    } else if (futureAge <= 6) {
+      weekData['tasks'] = [
+        'Alimentation finition 3 fois par jour',
+        'Évaluation poids final et uniformité',
+        'Contact acheteurs/abattoir',
+        'Préparation documents sanitaires',
+        'Planning transport et logistique',
+      ];
+      weekData['nutrition'] = 'Finition 16-18% protéines, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Inspection pré-commercialisation, certificats';
+      weekData['description'] = 'Finition commerciale - préparation vente';
       weekData['priority'] = 'high';
       weekData['estimatedCost'] = quantity * 30;
+    } else if (futureAge <= 7) {
+      weekData['tasks'] = [
+        'Restriction alimentaire pré-abattage',
+        'Organisation transport vers abattoir',
+        'Préparation des caisses de transport',
+        'Jeûne hydrique contrôlé (6h avant transport)',
+        'Inspection vétérinaire finale',
+      ];
+      weekData['nutrition'] = 'Restriction progressive, jeûne 8-12h avant abattage';
+      weekData['health'] = 'Certificat sanitaire obligatoire, inspection finale';
+      weekData['description'] = 'Phase pré-abattage - préparation transport';
+      weekData['priority'] = 'critical';
+      weekData['estimatedCost'] = quantity * 15;
     } else {
       weekData['tasks'] = [
-        'Évaluation finale du lot',
-        'Organisation transport abattoir',
-        'Jeûne pré-abattage (8-12h)',
-        'Préparation documents sanitaires',
-        'Nettoyage et désinfection après vente',
+        'Transport et livraison à l\'abattoir',
+        'Nettoyage complet des installations',
+        'Désinfection totale du bâtiment',
+        'Bilan technique et économique',
+        'Préparation nouveau cycle si prévu',
       ];
-      weekData['nutrition'] = 'Jeûne contrôlé selon planning abattage';
-      weekData['health'] = 'Certificat sanitaire, inspection vétérinaire';
-      weekData['description'] = 'Phase finale - préparation commercialisation';
-      weekData['priority'] = 'critical';
-      weekData['estimatedCost'] = quantity * 10;
+      weekData['nutrition'] = 'Fin de cycle - pas d\'alimentation';
+      weekData['health'] = 'Bilan sanitaire final, nettoyage désinfection';
+      weekData['description'] = 'Fin de cycle - nettoyage et bilan';
+      weekData['priority'] = 'normal';
+      weekData['estimatedCost'] = quantity * 5;
     }
   } else if (isPondeuses) {
-    if (age <= 18) {
+    if (futureAge <= 6) {
       weekData['tasks'] = [
-        'Alimentation poulettes adaptée à l\'âge',
-        'Contrôle croissance et uniformité',
-        'Programme lumineux adapté',
-        'Vaccination selon protocole',
-        'Préparation transition ponte',
+        'Alimentation poussin/poulette démarrage',
+        'Maintenir température optimale pour l\'âge',
+        'Programme lumineux adapté à la croissance',
+        'Vaccination selon protocole poulettes',
+        'Contrôle croissance et développement',
       ];
-      weekData['nutrition'] = 'Poulettes ${age < 12 ? "croissance" : "pré-ponte"}, ${_calculateFeedAmount(quantity, age)}kg/jour';
-      weekData['health'] = 'Suivi croissance, vaccinations programmées';
-      weekData['description'] = 'Élevage poulettes - préparation à la ponte';
+      weekData['nutrition'] = 'Poulette démarrage 20-22% protéines, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Vaccinations programmées, suivi croissance';
+      weekData['description'] = 'Élevage poulettes - phase démarrage';
       weekData['priority'] = 'normal';
-      weekData['estimatedCost'] = quantity * 20;
-    } else {
-      final ponteRate = age > 24 ? 85 : (age - 18) * 10 + 50; // Simulation taux de ponte
+      weekData['estimatedCost'] = quantity * 25;
+    } else if (futureAge <= 12) {
       weekData['tasks'] = [
-        'Ramassage œufs 3x/jour minimum',
-        'Contrôle taux de ponte ($ponteRate%)',
-        'Alimentation ponte haute calcium',
-        'Gestion éclairage (14-16h/jour)',
-        'Tri et calibrage des œufs',
+        'Alimentation poulette croissance',
+        'Contrôle uniformité du lot',
+        'Ajustement programme lumineux',
+        'Préparation transition vers ponte',
+        'Formation des groupes homogènes',
       ];
-      weekData['nutrition'] = 'Ponte 16-18% protéines + calcium, ${_calculateFeedAmount(quantity, age)}kg/jour';
-      weekData['health'] = 'Contrôle qualité coquille, supplément calcium';
-      weekData['description'] = 'Phase de ponte productive - maximiser la production';
-      weekData['priority'] = ponteRate > 80 ? 'high' : 'normal';
+      weekData['nutrition'] = 'Poulette croissance 16-18% protéines, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Évaluation développement reproducteur';
+      weekData['description'] = 'Croissance poulettes - préparation ponte';
+      weekData['priority'] = 'normal';
+      weekData['estimatedCost'] = quantity * 30;
+    } else if (futureAge <= 18) {
+      weekData['tasks'] = [
+        'Alimentation pré-ponte enrichie',
+        'Augmentation progressive éclairage (12-14h)',
+        'Installation/vérification pondoirs',
+        'Stimulation début de ponte',
+        'Surveillance comportement pré-ponte',
+      ];
+      weekData['nutrition'] = 'Pré-ponte 17-19% protéines + calcium, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Préparation physiologique ponte';
+      weekData['description'] = 'Phase pré-ponte - stimulation ponte';
+      weekData['priority'] = 'high';
       weekData['estimatedCost'] = quantity * 35;
+    } else if (futureAge <= 25) {
+      final weeksSincePonte = futureAge - 18;
+      final expectedRate = (weeksSincePonte * 15).clamp(20, 85);
+      weekData['tasks'] = [
+        'Ramassage œufs 3-4 fois/jour',
+        'Contrôle taux ponte (objectif ${expectedRate}%)',
+        'Alimentation ponte haute qualité',
+        'Éclairage optimal 16h/jour',
+        'Tri et calibrage quotidien œufs',
+      ];
+      weekData['nutrition'] = 'Ponte 16-18% protéines + calcium, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Surveillance qualité coquille, supplément calcium';
+      weekData['description'] = 'Montée en ponte - optimisation production';
+      weekData['priority'] = expectedRate > 70 ? 'high' : 'normal';
+      weekData['estimatedCost'] = quantity * 40;
+    } else {
+      final ponteRate = 85; // Pic de ponte
+      weekData['tasks'] = [
+        'Ramassage œufs optimal (4-5 fois/jour)',
+        'Maintien taux ponte pic (${ponteRate}%)',
+        'Contrôle qualité œufs quotidien',
+        'Gestion stockage et commercialisation',
+        'Surveillance santé reproductive',
+      ];
+      weekData['nutrition'] = 'Ponte pic 16-18% protéines + calcium, ${_calculateFeedAmount(quantity, futureAge)}kg/jour';
+      weekData['health'] = 'Optimisation santé reproductive, qualité coquille';
+      weekData['description'] = 'Pic de ponte - production maximale';
+      weekData['priority'] = 'high';
+      weekData['estimatedCost'] = quantity * 45;
     }
   } else {
-    // Type générique ou mixte
-    weekData['tasks'] = [
-      'Contrôle quotidien eau et alimentation',
-      'Inspection visuelle du cheptel',
-      'Nettoyage des équipements',
-      'Relevé des paramètres d\'ambiance',
-      'Tenue registre d\'élevage',
-    ];
-    weekData['nutrition'] = 'Alimentation adaptée à l\'âge et objectif';
-    weekData['health'] = 'Surveillance sanitaire quotidienne';
-    weekData['description'] = 'Gestion standard du cheptel';
-    weekData['priority'] = 'normal';
-    weekData['estimatedCost'] = quantity * 20;
+    // Type générique avec progression
+    final progressionPhase = _getGenericPhase(futureAge, weekNumber);
+    weekData['tasks'] = progressionPhase['tasks'];
+    weekData['nutrition'] = progressionPhase['nutrition'];
+    weekData['health'] = progressionPhase['health'];
+    weekData['description'] = progressionPhase['description'];
+    weekData['priority'] = progressionPhase['priority'];
+    weekData['estimatedCost'] = quantity * progressionPhase['costPerBird'];
   }
   
   return weekData;
 }
 
-// Méthode pour calculer la quantité d'aliment nécessaire
+// Nouvelle méthode pour gérer la progression générique
+Map<String, dynamic> _getGenericPhase(int age, int weekNumber) {
+  if (age <= 3) {
+    return {
+      'tasks': [
+        'Contrôle température et ambiance',
+        'Alimentation démarrage adaptée',
+        'Surveillance sanitaire quotidienne',
+        'Ajustement espace selon croissance',
+        'Tenue registre d\'élevage détaillé',
+      ],
+      'nutrition': 'Démarrage adapté à l\'âge ($age semaines)',
+      'health': 'Surveillance intensive démarrage',
+      'description': 'Phase démarrage - surveillance intensive',
+      'priority': 'high',
+      'costPerBird': 25,
+    };
+  } else if (age <= 8) {
+    return {
+      'tasks': [
+        'Alimentation croissance équilibrée',
+        'Contrôle développement et poids',
+        'Optimisation conditions d\'élevage',
+        'Vaccinations selon protocole',
+        'Évaluation performance technique',
+      ],
+      'nutrition': 'Croissance optimisée (${age} semaines)',
+      'health': 'Suivi croissance et vaccinations',
+      'description': 'Phase croissance - développement optimal',
+      'priority': 'normal',
+      'costPerBird': 30,
+    };
+  } else {
+    return {
+      'tasks': [
+        'Gestion production selon objectifs',
+        'Optimisation alimentation performance',
+        'Contrôle qualité produits',
+        'Suivi rentabilité économique',
+        'Planification cycles suivants',
+      ],
+      'nutrition': 'Production optimisée (${age} semaines)',
+      'health': 'Maintien performance sanitaire',
+      'description': 'Phase production - optimisation rendement',
+      'priority': 'normal',
+      'costPerBird': 35,
+    };
+  }
+}
+
+// Méthode pour calculer la quantité d'aliment nécessaire (CORRIGÉE)
 String _calculateFeedAmount(int quantity, int age) {
   double feedPerBird;
   
-  if (age <= 2) {
+  if (age <= 1) {
+    feedPerBird = 0.015; // 15g par sujet - première semaine
+  } else if (age <= 2) {
     feedPerBird = 0.025; // 25g par sujet
+  } else if (age <= 3) {
+    feedPerBird = 0.045; // 45g par sujet
   } else if (age <= 4) {
-    feedPerBird = 0.060; // 60g par sujet
+    feedPerBird = 0.070; // 70g par sujet
+  } else if (age <= 5) {
+    feedPerBird = 0.100; // 100g par sujet
   } else if (age <= 6) {
-    feedPerBird = 0.120; // 120g par sujet
-  } else {
+    feedPerBird = 0.130; // 130g par sujet
+  } else if (age <= 7) {
     feedPerBird = 0.140; // 140g par sujet
+  } else {
+    feedPerBird = age > 18 ? 0.120 : 0.110; // Pondeuses vs finition
   }
   
   final totalKg = (quantity * feedPerBird).roundToDouble();
   return totalKg.toStringAsFixed(1);
 }
 
-// Méthode pour déterminer la couleur selon le contexte
-Color _getWeekColor(int weekNumber, int age, String chickenType) {
+// Méthode pour déterminer la couleur selon le contexte (AMÉLIORÉE)
+Color _getWeekColor(int weekNumber, int futureAge, String chickenType) {
   final isChair = chickenType.toLowerCase().contains('chair');
+  final isPondeuses = chickenType.toLowerCase().contains('pondeuses');
   
-  if (weekNumber == 1) return Colors.green; // Semaine actuelle
+  if (weekNumber == 1) return Colors.green; // Prochaine semaine
   
   if (isChair) {
-    if (age <= 2) return Colors.red; // Phase critique
-    if (age <= 4) return Colors.blue; // Croissance
-    if (age <= 6) return Colors.orange; // Finition
-    return Colors.purple; // Commercialisation
+    if (futureAge <= 1) return Colors.red; // Installation critique
+    if (futureAge <= 3) return Colors.orange; // Phase critique
+    if (futureAge <= 5) return Colors.blue; // Croissance
+    if (futureAge <= 6) return Colors.purple; // Finition
+    return Colors.grey; // Post-abattage
+  } else if (isPondeuses) {
+    if (futureAge <= 12) return Colors.blue; // Élevage poulettes
+    if (futureAge <= 18) return Colors.orange; // Pré-ponte
+    return Colors.green; // Ponte
   } else {
-    if (age <= 18) return Colors.blue; // Élevage
-    return Colors.orange; // Ponte
+    if (futureAge <= 3) return Colors.red; // Démarrage
+    if (futureAge <= 8) return Colors.blue; // Croissance
+    return Colors.green; // Production
   }
 }
 
@@ -1311,26 +1464,33 @@ void _showAllTasks(String week, List<String> tasks) {
               ),
             ),
             const SizedBox(height: 16),
-            ...tasks.map((task) => Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.task_alt, size: 16, color: Colors.green[700]),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      task,
-                      style: const TextStyle(fontSize: 14),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 400),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: tasks.map((task) => Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  ),
-                ],
+                    child: Row(
+                      children: [
+                        Icon(Icons.task_alt, size: 16, color: Colors.green[700]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            task,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )).toList(),
+                ),
               ),
-            )).toList(),
+            ),
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerRight,
