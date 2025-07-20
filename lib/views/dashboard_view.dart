@@ -62,7 +62,7 @@ class DashboardView extends StatelessWidget {
                     child: _buildStatCard(
                       'Dépenses',
                       '45,000 F',
-                      Icons.attach_money,
+                      Icons.money_sharp,
                       Colors.green,
                     ),
                   ),
@@ -86,30 +86,55 @@ class DashboardView extends StatelessWidget {
                 mainAxisSpacing: 16,
                 children: [
                   _buildActionCard(
-                    'Mes Animaux',
-                    Icons.list,
-                    Colors.blue,
-                    () => Get.toNamed('/animals-list'),
-                  ),
-                  _buildActionCard(
-                    'Calendrier',
-                    Icons.calendar_today,
-                    Colors.purple,
-                    () => Get.toNamed('/calendar'),
-                  ),
-                  _buildActionCard(
                     'Chat IA',
                     Icons.chat,
                     Colors.teal,
                     () => Get.toNamed('/chat'),
                   ),
                   _buildActionCard(
-                    'Rapports',
+                    'Plannings',
                     Icons.analytics,
                     Colors.orange,
                     () => Get.toNamed('/analytics'),
                   ),
                 ],
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Section Plannings Récents
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Plannings Récents',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => Get.toNamed('/analytics'),
+                    child: Text(
+                      'Voir tout',
+                      style: TextStyle(color: Colors.green[700]),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildPlanningCard(
+                'Planning Poulets de Chair - Lot A',
+                '500 sujets - Semaine 8',
+                'Vaccination prévue dans 2 jours',
+                Icons.schedule,
+                Colors.green,
+              ),
+              _buildPlanningCard(
+                'Planning Poules Pondeuses - Bât B',
+                '300 poules - Ponte active',
+                'Contrôle sanitaire prévu',
+                Icons.egg,
+                Colors.orange,
               ),
               
               const SizedBox(height: 24),
@@ -129,10 +154,14 @@ class DashboardView extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/add-animal'),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Get.toNamed('/generate-planning'),
         backgroundColor: Colors.green[700],
-        child: const Icon(Icons.add, color: Colors.white),
+        icon: const Icon(Icons.auto_awesome, color: Colors.white),
+        label: const Text(
+          'Générer Planning',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -201,6 +230,72 @@ class DashboardView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlanningCard(String title, String subtitle, String status, IconData icon, Color color) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+          ),
+        ],
+        border: Border(
+          left: BorderSide(color: color, width: 4),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  status,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: Colors.grey[400]),
+        ],
       ),
     );
   }

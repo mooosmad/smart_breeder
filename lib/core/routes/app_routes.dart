@@ -5,8 +5,9 @@ import 'package:smart_breeder/views/add_animal_view.dart';
 import 'package:smart_breeder/views/analytics_view.dart';
 import 'package:smart_breeder/views/animals_view.dart';
 import 'package:smart_breeder/views/calendar_view.dart';
-import 'package:smart_breeder/views/chat_view.dart';
+import 'package:smart_breeder/views/chat/chat_view.dart';
 import 'package:smart_breeder/views/dashboard_view.dart';
+import 'package:smart_breeder/views/generate_planning_view.dart';
 import 'package:smart_breeder/views/splash_view.dart';
 import 'package:smart_breeder/views/animal_detail_view.dart';
 
@@ -19,6 +20,7 @@ class AppRoutes {
   static const String calendar = '/calendar';
   static const String chat = '/chat';
   static const String analytics = '/analytics';
+  static const String generatePlanning = '/generate-planning';
 
   static List<GetPage> routes = [
     GetPage(
@@ -71,6 +73,13 @@ class AppRoutes {
     GetPage(
       name: analytics,
       page: () => AnalyticsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<AnimalController>(() => AnimalController());
+      }),
+    ),
+    GetPage(
+      name: generatePlanning,
+      page: () => GeneratePlanningView(),
       binding: BindingsBuilder(() {
         Get.lazyPut<AnimalController>(() => AnimalController());
       }),
