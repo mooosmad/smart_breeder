@@ -5,7 +5,7 @@ import 'package:smart_breeder/data/models/vaccination_schedule_model.dart';
 
 class GeminiService extends GetxService {
   static const String _apiKey =
-      'AIzaSyCYL1S20lBKvPGjEneXhcsTkFcVD535RRo'; // À remplacer par ta clé API
+      'YOUR_KEY_GEMINI'; // À remplacer par ta clé API
   late GenerativeModel _model;
 
   @override
