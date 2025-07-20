@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class DashboardView extends StatelessWidget {
+class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
+
+  @override
+  State<DashboardView> createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<DashboardView> {
 
   @override
   Widget build(BuildContext context) {
@@ -154,15 +160,7 @@ class DashboardView extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Get.toNamed('/generate-planning'),
-        backgroundColor: Colors.green[700],
-        icon: const Icon(Icons.auto_awesome, color: Colors.white),
-        label: const Text(
-          'Générer Planning',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
+
     );
   }
 

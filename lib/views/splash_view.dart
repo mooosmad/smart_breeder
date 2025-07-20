@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen>
     
     // Navigation vers le dashboard après 3 secondes
     Future.delayed(Duration(seconds: 3), () {
-      Get.offNamed('/dashboard');
+      Get.offNamed('/mainpage');
 
     });
   }
